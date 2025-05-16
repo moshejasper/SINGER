@@ -5,7 +5,8 @@ import os
 import subprocess
 import argparse
 import random
-# import uuid
+import uuid
+import gzip
 import numpy as np
 # import pysam
 from pathlib import Path
@@ -161,7 +162,7 @@ def calculate_diversity(vcf_file, start, end):
     return nucleotide_diversity
 
 def compute_Ne(vcf_prefix, start, end, m):
-    if Path(vcf_prefix + ".vcf.gz").exist()
+    if Path(vcf_prefix + ".vcf.gz").exists():
         vcf_filename = vcf_prefix + ".vcf.gz" 
     else: vcf_filename = vcf_prefix + ".vcf"
     diversity = calculate_diversity(vcf_filename, start, end)
