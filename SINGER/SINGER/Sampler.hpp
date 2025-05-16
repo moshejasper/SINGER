@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <chrono>
 #include <sstream>
+#include <zlib.h>
 #include "ARG.hpp"
 #include "Threader_smc.hpp"
 #include "Binary_emission.hpp"
@@ -18,6 +19,15 @@
 #include "Normalizer.hpp"
 #include "Scaler.hpp"
 #include "Rate_map.hpp"
+#include "gzstream.hpp"
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <cassert>
+#include <numeric>
+#include <unordered_set>
+#include <random>
 
 class Sampler {
     

@@ -52,9 +52,30 @@ void Sampler::set_num_samples(int n) {
     num_samples = n;
 }
 
+bool file_exists(const std::string& filename) {
+    std::ifstream f(filename);
+    return f.good();
+}
+
+std::unique_ptr<std::istream> open_vcf_stream(const std::string& filename) {
+    if (filename.size() > 3 && filename.substr(filename.size() - 3) == ".gz") {
+        return std::make_unique<gzistream>(filename.c_str());
+    } else {
+        auto f = std::make_unique<std::ifstream>(filename);
+        if (!f->is_open()) {
+            throw std::runtime_error("Failed to open file: " + filename);
+        }
+        return f;
+    }
+}
+
+
 void Sampler::naive_read_vcf(string prefix, double start_pos, double end_pos) {
-    string vcf_file = prefix + ".vcf";
-    ifstream file(vcf_file);
+    string vcf_file = prefix + ".vcf.gz";
+    if (!file_exists(vcf_file)) {
+        string vcf_file = prefix + ".vcf";
+    }
+    unique_ptr<istream> file = open_vcf_stream(vcf_file);
     string line;
     int num_individuals = 0;
     int prev_pos = -1;
@@ -62,7 +83,7 @@ void Sampler::naive_read_vcf(string prefix, double start_pos, double end_pos) {
     int valid_mutation = 0;
     int removed_mutation = 0;
     vector<double> genotypes = {};
-    while (getline(file, line)) {
+    while (getline(*file, line)) {
         if (line.substr(0, 6) == "#CHROM") {
             istringstream iss(line);
             vector<string> fields;
@@ -95,9 +116,9 @@ void Sampler::naive_read_vcf(string prefix, double start_pos, double end_pos) {
             continue;
         } // skip multi-allelic sites or structural variant
         
-        streampos old_pos = file.tellg();
+        streampos old_pos = file->tellg();
         string next_line;
-        if (getline(file, next_line)) {
+        if (getline(*file, next_line)) {
             istringstream next_iss(next_line);
             string next_chrom;
             int next_pos;
@@ -107,7 +128,7 @@ void Sampler::naive_read_vcf(string prefix, double start_pos, double end_pos) {
                 prev_pos = pos;
                 continue;
             }
-            file.seekg(old_pos);
+            file->seekg(old_pos);
         }
         int individual_index = 0;
         while (iss >> genotype) {
@@ -248,6 +269,7 @@ void Sampler::guide_read_vcf(string prefix, double start, double end) {
     cout << "valid mutations: " << valid_mutation << endl;
     cout << "removed mutations: " << removed_mutation << endl;
 }
+
 
 void Sampler::load_vcf(string prefix, double start, double end) {
     string index_file = prefix + ".index";
