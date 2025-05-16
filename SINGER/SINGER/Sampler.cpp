@@ -116,9 +116,9 @@ void Sampler::naive_read_vcf(string prefix, double start_pos, double end_pos) {
             continue;
         } // skip multi-allelic sites or structural variant
         
-        streampos old_pos = file.tellg();
+        streampos old_pos = file->tellg();
         string next_line;
-        if (getline(file, next_line)) {
+        if (getline(*file, next_line)) {
             istringstream next_iss(next_line);
             string next_chrom;
             int next_pos;
@@ -128,7 +128,7 @@ void Sampler::naive_read_vcf(string prefix, double start_pos, double end_pos) {
                 prev_pos = pos;
                 continue;
             }
-            file.seekg(old_pos);
+            file->seekg(old_pos);
         }
         int individual_index = 0;
         while (iss >> genotype) {
